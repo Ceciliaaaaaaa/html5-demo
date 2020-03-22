@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Canvas钟表</title>
+<style>
+	body {
+		padding: 0;
+		margin: 0;
+		background-color: rgba(0, 0, 0, 0.1)
+	}
+
+	canvas {
+        border: 1px solid #000;
+		display: block;
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        
+        transform: translate(-50%,-50%);
+	}
+</style>
+</head>
+<body>
+<canvas id="myCanvas" width="400" height="400"></canvas>
+<script>
+    var canvas = document.getElementById("myCanvas");
+    var ctx = canvas.getContext("2d");  //获得2d上下文对象
+
+    //时针转动
+    (function play(){
+        ctx.clearRect(0,0,canvas.width,canvas.height);  //清除画布
+        ctx.save();
+        drawDial(ctx);
+        drawPointer(ctx);
+        ctx.restore();
+        requestAnimationFrame(play);
+    })()  //立即执行函数
+
+
+    //绘制表盘和刻度
+    function drawDial(ctx){
+         //移动canvas的原点
+        ctx.translate(canvas.width/2,canvas.height/2);
+
+        //绘制表盘
+        ctx.beginPath();
+        ctx.arc(0,0,150,0,2*Math.PI);   //绘制圆弧：arc(x, y, r, startAngle, endAngle, anticlockwise),以(x, y)为圆心，以r为半径，从 startAngle弧度开始到endAngle弧度结束,anticlosewise是布尔值，true表示逆时针，false表示顺时针(默认是顺时针)。
+        ctx.stroke();
+
+        //绘制时针刻度
+        // ctx.strokeStyle = "#000";
+        ctx.lineWidth = 3; 
+        for(var i = 0; i < 12; i++){
+            ctx.beginPath();
+            ctx.moveTo(0,-120);
+            ctx.lineTo(0,-140);
+            ctx.stroke();
+            ctx.rotate(2*Math.PI/12);
+        }
+
+        //绘制分针刻度
+        ctx.lineWidth = 2; 
+        for(var i = 0; i < 60; i++){
+            ctx.beginPath();
+            ctx.moveTo(0,-130);
+            ctx.lineTo(0,-140);
+            ctx.stroke();
+            ctx.rotate(2*Math.PI/60);
+        }   
+
+        //绘制中心点
+        ctx.beginPath();
+        ctx.arc(0,0,5,0,2*Math.PI);
+        ctx.stroke();
+        ctx.fill();
+
+        //绘制数字
+        ctx.textAlign = "center";   //水平居中
+        ctx.textBaseline = "middle";    //垂直居中
+        ctx.font = "15px 微软雅黑";
+        for(var i = 1; i < 13; i++){
+            ctx.fillText(i,Math.sin(2*Math.PI/12*i)*110,Math.cos(2*Math.PI/12*i)*-110); //用三角函数设定x,y坐标
+        }
+    }
+
+    //绘制指针
+    function drawPointer(ctx){
+        //获取时间信息
+        var date = new Date();
+        var h = date.getHours();
+        var m = date.getMinutes();
+        var s = date.getSeconds();
+        // 时针
+        ctx.save();
+        ctx.rotate(2*Math.PI/12*h + (2*Math.PI/60*m + 2*Math.PI/60*s/60)/12); //分针走60格，时针走5格，即分针走12格，时针走1格
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(0,0);
+        ctx.lineTo(0,-80);
+        ctx.stroke();
+        ctx.restore();
+        //分针
+        ctx.save();
+        ctx.rotate(2*Math.PI/60*m + 2*Math.PI/60*s/60); //秒针走60格，分针走一格
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(0,0);
+        ctx.lineTo(0,-110);
+        ctx.stroke();
+        ctx.restore();
+        //秒针
+        ctx.save();
+        ctx.rotate(2*Math.PI/60*s);
+        ctx.lineWidth = 1;
+        ctx.strokeStyle = "#ff0000";
+        ctx.beginPath();
+        ctx.moveTo(0,0);
+        ctx.lineTo(0,-125);
+        ctx.stroke();
+        ctx.restore();
+    }
+</script>
+</body>
+</html>
